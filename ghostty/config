@@ -1,6 +1,6 @@
 # Keybinds
-keybind = ctrl+v=new_split:right
-keybind = ctrl+h=new_split:down
+keybind = ctrl+shift+v=new_split:right
+# keybind = ctrl+h=new_split:down
 keybind = global:ctrl+`=toggle_quick_terminal
 
 # Theme
