@@ -5,10 +5,20 @@ This repository contains my personal dotfiles for the variety of tools I use. Cu
 - zsh
 - ghostty
 - nvim
+- git
+
+For git, this includes a global gitignore file for OSX as well as a config file. The config file contains two of my personal favourite alias git commands:
+
+- `git uncommit`: undoes the last commit, leaving files staged.
+- `git push-origin`: creates and pushes to new remote branch with the same name as the current local branch. Functionally identical to the command you are given to run if you try to `git push` without a remote origin for your branch.
 
 ## Getting Started
 
 ### Prerequisite Installations
+
+#### Version Control
+
+- git
 
 #### Terminal
 
@@ -33,7 +43,13 @@ Dotfiles are linked to various applications via symlinks. Run the following comm
 ln -s ~/.dotfiles/.zshrc ~/.zshrc
 ln -s ~/.dotfiles/nvim ~/.config/nvim
 ln -s ~/.dotfiles/ghostty ~/.config/ghostty
+ln -s ~/.dotfiles/.global-gitignore ~/.gitignore
+ln -s ~/.dotfiles/.gitconfig ~/.gitconfig
 ```
+
+### Changes
+
+My dotfiles use my own username and directory filepaths. Change them to suit your own.
 
 #### API Keys
 

@@ -1,0 +1,17 @@
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[credential]
+	helper = osxkeychain
+[user]
+	name = Chad Rossouw
+	email = chadrossouw7247@gmail.com
+[core]
+	excludesfile = /Users/rossoc1/.gitignore
+	editor = vim
+[alias]
+	uncommit = reset --soft HEAD~1
+	push-origin = "!f() { git push --set-upstream origin $(git rev-parse --abbrev-ref HEAD); }; f"
+
