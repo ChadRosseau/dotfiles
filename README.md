@@ -51,6 +51,6 @@ ln -s ~/.dotfiles/.gitconfig ~/.gitconfig
 
 My dotfiles use my own username and directory filepaths. Change them to suit your own.
 
-#### API Keys
+### API Keys
 
 API Keys are set via using the `api_keys` file in this repository. Rename the `api_keys.sample` file to simply `api_keys` in order to start using it. Ensure to populate the file as needed with your own keys.
