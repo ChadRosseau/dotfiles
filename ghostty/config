@@ -1,0 +1,19 @@
+# Keybinds
+keybind = ctrl+v=new_split:right
+keybind = ctrl+h=new_split:down
+keybind = global:ctrl+`=toggle_quick_terminal
+
+# Theme
+theme = catppuccin-mocha
+font-family = "MesloLGS NF"
+font-size = 20
+window-padding-x = 10
+macos-titlebar-style = tabs
+
+# Action
+cursor-click-to-move = true
+confirm-close-surface = false
+window-new-tab-position = end
+clipboard-trim-trailing-spaces = true
+
+# quit-after-last-window-closed = true
