@@ -221,6 +221,9 @@ local default_plugins = {
           { "<leader>fo", builtin.oldfiles,                                                 desc = "Find Recent" },
           { "<leader>fh", builtin.help_tags,                                                desc = "Find Help" },
           { "<leader>fn", ":Telescope file_browser path=%:p:help |select_buffer=true<CR>|", desc = "File Browser" },
+          { "<leader>cm", builtin.git_commits,                                              desc = "Git Commits" },
+          { "<leader>gt", builtin.git_status,                                               desc = "Git Status" },
+          { "<leader>ma", builtin.marks,                                                    desc = "Telescope Bookmarks" },
         }
       -- {
       --      ['ff'] = { builtin.find_files, "Find File" },
