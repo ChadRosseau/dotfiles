@@ -138,11 +138,6 @@ export NVM_DIR="$HOME/.nvm"
 # Flutter SDK
 export PATH="$PATH:/Users/rossoc1/Desktop/Coding/Mobile/flutter/bin"
 
-# Neovim rebindings
-alias v="nvim"
-# alias vi="nvim"
-# alias vim="nvim"
-
 # LaTeX
 export "PATH=$PATH:/usr/local/texlive/2022/bin/universal-darwin"
 
@@ -191,3 +186,13 @@ if [ -f "$API_KEY_PATH" ]; then
 else
   echo "API key file not found at: $API_KEY_PATH" > logs.txt
 fi
+
+# File editing
+alias zshconfig="v ~/.dotfiles/.zshrc"
+alias ghosttyconfig="v ~/.dotfiles/ghostty/config"
+alias vconfig="v ~/.dotfiles/nvim"
+
+# Neovim rebindings
+alias v="nvim"
+# alias vi="nvim"
+# alias vim="nvim"
