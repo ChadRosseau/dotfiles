@@ -1,6 +1,13 @@
 # Keybinds
-keybind = ctrl+shift+v=new_split:right
-# keybind = ctrl+h=new_split:down
+keybind = super+shift+t=new_split:right
+keybind = super+ctrl+t=new_split:down
+keybind = ctrl+h=goto_split:left
+keybind = ctrl+j=goto_split:bottom
+keybind = ctrl+k=goto_split:top
+keybind = ctrl+l=goto_split:right
+# keybind = ctrl+o=clear_screen
+keybind = ctrl+o=text:clear\n
+keybind = ctrl+e=equalize_splits
 keybind = global:ctrl+`=toggle_quick_terminal
 
 # Theme
