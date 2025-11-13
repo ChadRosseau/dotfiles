@@ -10,21 +10,20 @@ require("core.utils").load_mappings()
 
 local lazypath = vim.fn.stdpath "data" .. "/lazy/lazy.nvim"
 
-
 -- Manual way to get tailwind autocomplete in angular files
-vim.cmd([[
+vim.cmd [[
   autocmd BufNewFile,BufRead *.component.html set filetype=html
-]])
+]]
 
 -- Disable ESLint LSP server and hide virtual text in Neovim
 -- Add this to your init.lua or init.vim file
 local isLspDiagnosticsVisible = true
 vim.keymap.set("n", "<leader>lx", function()
   isLspDiagnosticsVisible = not isLspDiagnosticsVisible
-  vim.diagnostic.config({
+  vim.diagnostic.config {
     virtual_text = isLspDiagnosticsVisible,
-    underline = isLspDiagnosticsVisible
-  })
+    underline = isLspDiagnosticsVisible,
+  }
 end)
 
 -- bootstrap lazy.nvim!
@@ -38,3 +37,16 @@ vim.opt.rtp:prepend(lazypath)
 require "plugins"
 
 vim.g.gitgutter_enabled = 1
+
+-- Highlighting in embedded terminal
+vim.opt.termguicolors = true
+vim.api.nvim_create_autocmd("TermOpen", {
+  pattern = "*",
+  callback = function()
+    vim.cmd [[
+      hi Terminal guifg=#cdd6f4 guibg=#1e1e2e
+      hi TerminalBold guifg=#f5c2e7 guibg=#1e1e2e gui=bold
+    ]]
+    vim.cmd "startinsert"
+  end,
+})
