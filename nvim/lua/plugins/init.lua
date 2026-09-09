@@ -1,279 +1,224 @@
--- All plugins have lazy=true by default,to load a plugin on startup just lazy=false
--- List of all default plugins & their definitions
-local default_plugins = {
+return {
+  -- ── Formatting ────────────────────────────────────────────────────────────
+  {
+    "stevearc/conform.nvim",
+    event = "BufWritePre", -- format on save
+    opts = require "configs.conform",
+  },
 
-  "nvim-lua/plenary.nvim",
+  -- ── LSP ───────────────────────────────────────────────────────────────────
+  {
+    "neovim/nvim-lspconfig",
+    config = function()
+      require "configs.lspconfig"
+    end,
+  },
+
+  -- ── Treesitter ────────────────────────────────────────────────────────────
+  {
+    "nvim-treesitter/nvim-treesitter",
+    opts = {
+      ensure_installed = {
+        -- core
+        "lua",
+        "luadoc",
+        "vim",
+        "vimdoc",
+        "query",
+        "bash",
+        "diff",
+        "gitcommit",
+        "regex",
+        -- web
+        "html",
+        "css",
+        "javascript",
+        "typescript",
+        "tsx",
+        "json",
+        "jsonc",
+        "yaml",
+        "toml",
+        -- markdown
+        "markdown",
+        "markdown_inline",
+        -- languages
+        "python",
+        "rust",
+        "ron",
+        "go",
+        "gomod",
+        "gosum",
+        "gowork",
+        "java",
+        "solidity",
+        "c",
+        "cpp",
+        "asm",
+      },
+    },
+  },
 
   {
-    "NvChad/base46",
-    branch = "v2.0",
-    build = function()
-      require("base46").load_all_highlights()
+    "windwp/nvim-ts-autotag",
+    ft = { "html", "javascript", "javascriptreact", "typescript", "typescriptreact", "markdown" },
+    opts = {},
+  },
+
+  -- ── Rust ──────────────────────────────────────────────────────────────────
+  -- Replaces the archived rust-tools.nvim. It starts and owns rust-analyzer
+  -- itself, so rust_analyzer must NOT also be enabled in configs/lspconfig.lua.
+  {
+    "mrcjkb/rustaceanvim",
+    lazy = false, -- the plugin lazy-loads itself via ftplugin
+    init = function()
+      local ok, nvlsp = pcall(require, "nvchad.configs.lspconfig")
+
+      vim.g.rustaceanvim = {
+        server = {
+          capabilities = ok and nvlsp.capabilities or nil,
+          default_settings = {
+            ["rust-analyzer"] = {
+              cargo = { allFeatures = true },
+              checkOnSave = true,
+              check = { command = "clippy" },
+              inlayHints = { lifetimeElisionHints = { enable = "never" } },
+            },
+          },
+        },
+      }
     end,
   },
 
   {
-    "NvChad/ui",
-    branch = "v2.0",
+    "saecki/crates.nvim",
+    event = { "BufRead Cargo.toml" },
+    opts = {},
+  },
+
+  {
+    "hrsh7th/nvim-cmp",
+    opts = function(_, opts)
+      table.insert(opts.sources, { name = "crates" })
+      return opts
+    end,
+  },
+
+  -- ── Navigation ────────────────────────────────────────────────────────────
+  -- Kept eager: the s/S mappings and the remote text objects in mappings.lua
+  -- expect leap's <Plug> maps to already exist. It costs ~1ms.
+  --
+  -- Tracking upstream on Codeberg. The author moved the project there and
+  -- gutted the GitHub repo -- `ggandor/leap.nvim` on GitHub is now a README
+  -- and nothing else, so never point this back at GitHub.
+  --
+  -- The API moved on from the version you were running: leap.remote was
+  -- replaced by leap.visit. See the notes in lua/mappings.lua, and run
+  -- :LeapInfo if a key stops working after an update.
+  {
+    url = "https://codeberg.org/andyg/leap.nvim",
+    name = "leap.nvim",
     lazy = false,
   },
 
   {
-    "zbirenbaum/nvterm",
-    init = function()
-      require("core.utils").load_mappings "nvterm"
-    end,
-    config = function(_, opts)
-      require "base46.term"
-      require("nvterm").setup(opts)
-    end,
-  },
+    "nvim-telescope/telescope.nvim",
+    dependencies = { "nvim-telescope/telescope-file-browser.nvim" },
+    opts = function(_, opts)
+      local previewers = require "telescope.previewers"
 
-  {
-    "NvChad/nvim-colorizer.lua",
-    event = "User FilePost",
-    config = function(_, opts)
-      require("colorizer").setup(opts)
-
-      -- execute colorizer as soon as possible
-      vim.defer_fn(function()
-        require("colorizer").attach_to_buffer(0)
-      end, 0)
-    end,
-  },
-
-  {
-    "nvim-tree/nvim-web-devicons",
-    opts = function()
-      return { override = require "nvchad.icons.devicons" }
-    end,
-    config = function(_, opts)
-      dofile(vim.g.base46_cache .. "devicons")
-      require("nvim-web-devicons").setup(opts)
-    end,
-  },
-
-  {
-    "lukas-reineke/indent-blankline.nvim",
-    version = "2.20.7",
-    event = "User FilePost",
-    opts = function()
-      return require("plugins.configs.others").blankline
-    end,
-    config = function(_, opts)
-      require("core.utils").load_mappings "blankline"
-      dofile(vim.g.base46_cache .. "blankline")
-      require("indent_blankline").setup(opts)
-    end,
-  },
-
-  {
-    "nvim-treesitter/nvim-treesitter",
-    event = { "BufReadPost", "BufNewFile" },
-    cmd = { "TSInstall", "TSBufEnable", "TSBufDisable", "TSModuleInfo" },
-    build = ":TSUpdate",
-    opts = function()
-      return require "plugins.configs.treesitter"
-    end,
-    config = function(_, opts)
-      dofile(vim.g.base46_cache .. "syntax")
-      require("nvim-treesitter.configs").setup(opts)
-    end,
-  },
-
-  -- git stuff
-  {
-    "lewis6991/gitsigns.nvim",
-    event = "User FilePost",
-    opts = function()
-      return require("plugins.configs.others").gitsigns
-    end,
-    config = function(_, opts)
-      dofile(vim.g.base46_cache .. "git")
-      require("gitsigns").setup(opts)
-    end,
-  },
-
-  -- lsp stuff
-  {
-    "williamboman/mason.nvim",
-    cmd = { "Mason", "MasonInstall", "MasonInstallAll", "MasonUpdate" },
-    opts = function()
-      return require "plugins.configs.mason"
-    end,
-    config = function(_, opts)
-      dofile(vim.g.base46_cache .. "mason")
-      require("mason").setup(opts)
-
-      -- custom nvchad cmd to install all mason binaries listed
-      vim.api.nvim_create_user_command("MasonInstallAll", function()
-        if opts.ensure_installed and #opts.ensure_installed > 0 then
-          vim.cmd("MasonInstall " .. table.concat(opts.ensure_installed, " "))
-        end
-      end, {})
-
-      vim.g.mason_binaries_list = opts.ensure_installed
-    end,
-  },
-
-  {
-    "neovim/nvim-lspconfig",
-    event = "User FilePost",
-    config = function()
-      require "plugins.configs.lspconfig"
-    end,
-  },
-
-  -- load luasnips + cmp related in insert mode only
-  {
-    "hrsh7th/nvim-cmp",
-    event = "InsertEnter",
-    dependencies = {
-      {
-        -- snippet plugin
-        "L3MON4D3/LuaSnip",
-        dependencies = "rafamadriz/friendly-snippets",
-        opts = { history = true, updateevents = "TextChanged,TextChangedI" },
-        config = function(_, opts)
-          require("plugins.configs.others").luasnip(opts)
-        end,
-      },
-
-      -- autopairing of (){}[] etc
-      {
-        "windwp/nvim-autopairs",
-        opts = {
-          fast_wrap = {},
-          disable_filetype = { "TelescopePrompt", "vim" },
+      opts.defaults = vim.tbl_deep_extend("force", opts.defaults or {}, {
+        vimgrep_arguments = {
+          "rg",
+          "-L",
+          "--color=never",
+          "--no-heading",
+          "--with-filename",
+          "--line-number",
+          "--column",
+          "--smart-case",
         },
-        config = function(_, opts)
-          require("nvim-autopairs").setup(opts)
+        file_previewer = previewers.vim_buffer_cat.new,
+        grep_previewer = previewers.vim_buffer_vimgrep.new,
+        qflist_previewer = previewers.vim_buffer_qflist.new,
+      })
 
-          -- setup cmp for autopairs
-          local cmp_autopairs = require "nvim-autopairs.completion.cmp"
-          require("cmp").event:on("confirm_done", cmp_autopairs.on_confirm_done())
-        end,
-      },
+      opts.pickers = vim.tbl_deep_extend("force", opts.pickers or {}, {
+        find_files = { theme = "dropdown" },
+        live_grep = { theme = "dropdown" },
+        buffers = { theme = "dropdown" },
+      })
 
-      -- cmp sources plugins
-      {
-        "saadparwaiz1/cmp_luasnip",
-        "hrsh7th/cmp-nvim-lua",
-        "hrsh7th/cmp-nvim-lsp",
-        "hrsh7th/cmp-buffer",
-        "hrsh7th/cmp-path",
-      },
-    },
-    opts = function()
-      return require "plugins.configs.cmp"
-    end,
-    config = function(_, opts)
-      require("cmp").setup(opts)
-    end,
-  },
+      opts.extensions = vim.tbl_deep_extend("force", opts.extensions or {}, {
+        file_browser = {
+          theme = "ivy",
+          hijack_netrw = true,
+        },
+      })
 
-  {
-    "numToStr/Comment.nvim",
-    keys = {
-      -- { "gcc", mode = "n", desc = "Comment toggle current line" },
-      { "gc",  mode = "o", desc = "Comment toggle linewise" },
-      { "gc",  mode = "x", desc = "Comment toggle linewise (visual)" },
-      { "gbc", mode = "n", desc = "Comment toggle current block" },
-      { "gb",  mode = "o", desc = "Comment toggle blockwise" },
-      { "gb",  mode = "x", desc = "Comment toggle blockwise (visual)" },
-    },
-    init = function()
-      require("core.utils").load_mappings "comment"
-    end,
-    config = function(_, opts)
-      require("Comment").setup(opts)
+      opts.extensions_list = opts.extensions_list or {}
+      table.insert(opts.extensions_list, "file_browser")
+
+      return opts
     end,
   },
 
-  -- file managing , picker etc
+  -- ── nvim-tree ─────────────────────────────────────────────────────────────
   {
     "nvim-tree/nvim-tree.lua",
-    cmd = { "NvimTreeToggle", "NvimTreeFocus" },
-    init = function()
-      require("core.utils").load_mappings "nvimtree"
-    end,
-    opts = function()
-      return require "plugins.configs.nvimtree"
-    end,
-    config = function(_, opts)
-      dofile(vim.g.base46_cache .. "nvimtree")
-      require("nvim-tree").setup(opts)
-    end,
-  },
-  {
-    "nvim-telescope/telescope.nvim",
-    dependencies = { "nvim-treesitter/nvim-treesitter" },
-    cmd = "Telescope",
-    init = function()
-      local builtin = require('telescope.builtin')
-      local wk = require('which-key')
-      wk.add(
-        {
-          { "<leader>ff", builtin.find_files,                                               desc = "Find File" },
-          { "<leader>fb", builtin.buffers,                                                  desc = "Find Buffer" },
-          { "<leader>fg", builtin.live_grep,                                                desc = "Find with Grep" },
-          { "<leader>fi", builtin.current_buffer_fuzzy_find,                                desc = "Fuzzy find in current file" },
-          { "<leader>fo", builtin.oldfiles,                                                 desc = "Find Recent" },
-          { "<leader>fh", builtin.help_tags,                                                desc = "Find Help" },
-          { "<leader>fn", ":Telescope file_browser path=%:p:help |select_buffer=true<CR>|", desc = "File Browser" },
-          { "<leader>cm", builtin.git_commits,                                              desc = "Git Commits" },
-          { "<leader>gt", builtin.git_status,                                               desc = "Git Status" },
-          { "<leader>ma", builtin.marks,                                                    desc = "Telescope Bookmarks" },
-        }
-      -- {
-      --      ['ff'] = { builtin.find_files, "Find File" },
-      --      ['fb'] = { builtin.buffers, "Find Buffer" },
-      --      ['fg'] = { builtin.live_grep, "Find with Grep" },
-      --      ['fh'] = { builtin.help_tags, "Find Help" },
-      --      ['fn'] = { ":Telescope file_browser path=%:p:h select_buffer=true<CR>", "File Browser" },
-      --    }, { prefix = "<leader>" } { "<leader>fb", <function 1>, desc = "Find Buffer" },
-      )
-    end,
-    opts = function()
-      return require "plugins.configs.telescope"
-    end,
-    config = function(_, opts)
-      local telescope = require "telescope"
-      telescope.setup(opts)
-
-      -- load extensions
-      for _, ext in ipairs(opts.extensions_list) do
-        telescope.load_extension(ext)
-      end
-    end,
-  },
-  {
-    "nvim-telescope/telescope-file-browser.nvim",
-    dependencies = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim" }
-  },
-  {
-
+    opts = {
+      filters = {
+        dotfiles = false,
+        custom = { "**/*.spec.ts", ".DS_Store" },
+      },
+      git = { enable = false, ignore = true },
+      view = { width = 30, preserve_window_proportions = true },
+    },
   },
 
-  -- Only load whichkey after all the gui
+  -- ── Markdown ──────────────────────────────────────────────────────────────
   {
-    "folke/which-key.nvim",
-    keys = { "<leader>", "<c-r>", "<c-w>", '"', "'", "`", "c", "v", "g" },
-    init = function()
-      require("core.utils").load_mappings "whichkey"
+    "iamcco/markdown-preview.nvim",
+    ft = "markdown",
+    build = function()
+      vim.fn["mkdp#util#install"]()
     end,
-    cmd = "WhichKey",
+    config = function()
+      vim.g.mkdp_auto_start = 0
+      vim.g.mkdp_auto_close = 0
+      vim.g.mkdp_refresh_slow = 1
+      vim.g.mkdp_theme = "dark"
+      vim.g.mkdp_combine_preview = 1
+    end,
+  },
+
+  -- ── UI ────────────────────────────────────────────────────────────────────
+  {
+    "rcarriga/nvim-notify",
+    event = "VeryLazy",
+    opts = {
+      level = 2,
+      minimum_width = 50,
+      render = "default",
+      stages = "fade_in_slide_out",
+      timeout = 3000,
+      top_down = false,
+    },
     config = function(_, opts)
-      dofile(vim.g.base46_cache .. "whichkey")
-      require("which-key").setup(opts)
+      require("notify").setup(opts)
+      vim.notify = require "notify"
     end,
   },
 }
 
-local config = require("core.utils").load_config()
-
-if #config.plugins > 0 then
-  table.insert(default_plugins, { import = config.plugins })
-end
-
-require("lazy").setup(default_plugins, config.lazy_nvim)
+-- ────────────────────────────────────────────────────────────────────────────
+-- leap.nvim note
+--
+-- Upstream is https://codeberg.org/andyg/leap.nvim (not GitHub).
+-- If leap ever breaks after an update, the fallback is the last commit that
+-- still existed on GitHub, which is the version you ran before:
+--
+--   { "ggandor/leap.nvim", commit = "c6bfb191f1161fbabace1f36f578a20ac6c7642c", pin = true, lazy = false },
+--
+-- The maintained GitHub-hosted alternative is folke/flash.nvim.
+-- ────────────────────────────────────────────────────────────────────────────

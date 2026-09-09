@@ -1,52 +1,36 @@
-require "core"
+vim.g.base46_cache = vim.fn.stdpath "data" .. "/base46/"
+vim.g.mapleader = " "
 
-local custom_init_path = vim.api.nvim_get_runtime_file("lua/custom/init.lua", false)[1]
-
-if custom_init_path then
-  dofile(custom_init_path)
-end
-
-require("core.utils").load_mappings()
-
+-- bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath "data" .. "/lazy/lazy.nvim"
 
--- Manual way to get tailwind autocomplete in angular files
-vim.cmd [[
-  autocmd BufNewFile,BufRead *.component.html set filetype=html
-]]
-
--- Disable ESLint LSP server and hide virtual text in Neovim
--- Add this to your init.lua or init.vim file
-local isLspDiagnosticsVisible = true
-vim.keymap.set("n", "<leader>lx", function()
-  isLspDiagnosticsVisible = not isLspDiagnosticsVisible
-  vim.diagnostic.config {
-    virtual_text = isLspDiagnosticsVisible,
-    underline = isLspDiagnosticsVisible,
-  }
-end)
-
--- bootstrap lazy.nvim!
-if not vim.loop.fs_stat(lazypath) then
-  require("core.bootstrap").gen_chadrc_template()
-  require("core.bootstrap").lazy(lazypath)
+if not vim.uv.fs_stat(lazypath) then
+  local repo = "https://github.com/folke/lazy.nvim.git"
+  vim.fn.system { "git", "clone", "--filter=blob:none", repo, "--branch=stable", lazypath }
 end
 
-dofile(vim.g.base46_cache .. "defaults")
 vim.opt.rtp:prepend(lazypath)
-require "plugins"
 
-vim.g.gitgutter_enabled = 1
+local lazy_config = require "configs.lazy"
 
--- Highlighting in embedded terminal
-vim.opt.termguicolors = true
-vim.api.nvim_create_autocmd("TermOpen", {
-  pattern = "*",
-  callback = function()
-    vim.cmd [[
-      hi Terminal guifg=#cdd6f4 guibg=#1e1e2e
-      hi TerminalBold guifg=#f5c2e7 guibg=#1e1e2e gui=bold
-    ]]
-    vim.cmd "startinsert"
-  end,
-})
+require("lazy").setup({
+  {
+    "NvChad/NvChad",
+    lazy = false,
+    branch = "v2.5",
+    import = "nvchad.plugins",
+  },
+
+  { import = "plugins" },
+}, lazy_config)
+
+-- load theme
+dofile(vim.g.base46_cache .. "defaults")
+dofile(vim.g.base46_cache .. "statusline")
+
+require "options"
+require "autocmds"
+
+vim.schedule(function()
+  require "mappings"
+end)

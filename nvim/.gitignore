@@ -1,11 +1,8 @@
-plugin
-custom
-spell
-ftplugin
-syntax
-coc-settings.json
+# Neovim runtime state that does not belong in the repo
 .luarc.json
-lazy-lock.json
-after
 **/.DS_Store
-typrstats
+spell/
+
+# NOTE: lazy-lock.json is intentionally NOT ignored.
+# Tracking it is what makes this config reproducible on another machine
+# (including a server you SSH into).
